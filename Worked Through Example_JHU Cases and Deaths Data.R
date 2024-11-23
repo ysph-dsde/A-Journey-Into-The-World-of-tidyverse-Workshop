@@ -40,7 +40,7 @@ library(plotly)
 ## CSSEGISandData. Additional details can be found in the project repositories 
 ## main directory's README file.
 
-## We load cases and deaths counts =directly from their GitHub page using the 
+## We load cases and deaths counts directly from their GitHub page using the 
 ## raw URL.
 
 covid19_confirmed_url <- "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/refs/heads/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_US.csv"
@@ -58,6 +58,7 @@ covid19_death_raw  <- read_csv(file = covid19_death_url, show_col_types = FALSE)
 covid19_confirmed_raw_long <- 
   covid19_confirmed_raw |> 
   pivot_longer(
+    # which columns need to be pivoted
     cols = "1/22/20":"3/9/23", 
     names_to = "date",          
     values_to = "cumulative_count"
