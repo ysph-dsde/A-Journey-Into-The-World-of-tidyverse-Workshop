@@ -8,10 +8,7 @@
 ## R version:    4.4.1
 ## renv version: 1.0.11
 ## 
-## Description: Worked-through example generating line and bar graphs of
-##              time-series vaccination rates using the JHU CRC's data from 
-##              their GovEX GitHub repository. Refer to the main directory 
-##              README file for additional information.
+## Description: 
 
 ## ----------------------------------------------------------------------------
 ## SET UP THE ENVIRONMENT
@@ -23,6 +20,7 @@ library(readr)
 library(tidyr)
 library(dplyr)
 library(stringr)
+library(lubridate)
 library(ggplot2)
 library(lubridate)
 library(plotly)
@@ -54,22 +52,68 @@ covid19_death_raw  <- read_csv(file = covid19_death_url, show_col_types = FALSE)
 ## ----------------------------------------------------------------------------
 ## TIDYR
 
-# Pivot longer
-covid19_confirmed_raw_long <- 
-  covid19_confirmed_raw |> 
+## Death counts are expected to be more accurate to the daily count level. For
+## this example, we will use the deaths data set, however, the confirmed
+## cases data set can also be passed through the following series of operations
+## with minor variations.
+##
+## First we will inspect the characteristics of our data set.
+
+head(covid19_death_raw)
+dim(covid19_death_raw)
+
+## We see that new observations were added as new columns, so that each row
+## represents values for one, unique county in the U.S. To tidy the data, we
+## need to reshape the dates columns as added rows so that columns only
+## represent variables while rows represent new observations. 
+## 
+## This can be done using pivot_longer().
+
+# Find the start and end date of the new observation columns.
+colnames(covid19_death_raw)[c(13, ncol(covid19_death_raw))]
+
+covid19_death_raw_long <- 
+  covid19_death_raw |> 
   pivot_longer(
     # which columns need to be pivoted
     cols = "1/22/20":"3/9/23", 
-    names_to = "date",          
+    # names variable storing pivoted columns
+    names_to = "date",
+    # names the variable stored in cell values
     values_to = "cumulative_count"
   )
 
-# Pivot wider
-covid19_confirmed_raw_long |> 
+
+## Looking again at the top rows and dimensions of the long-form data set shows
+## that our transformation was successful.
+
+head(covid19_death_raw_long)
+dim(covid19_death_raw_long)
+
+## We also see that the newly made column "cumulative_count" is classified as
+## numeric, which is what we hope to see. Unfortunately, the dates column is
+## now classified as a character columns. 
+
+sapply(covid19_death_raw_long, class)
+
+## We can modify the class of variable to a dates class using lubridate from 
+## tidyverse. This package is not covered in this introductory workshop, but
+## those interested to find more can review the package documentation:
+## https://lubridate.tidyverse.org/
+
+covid19_death_raw_long$date <- mdy(covid19_death_raw_long$date)
+
+
+## It is possible to do the reverse operation as pivot_long(). The following
+## code demonstrates how to reoritent the code from a long to wide format.
+
+covid19_death_raw_long |> 
   pivot_wider(
+    # which columns have new variable names
     names_from = date,
+    # column of values for new variables
     values_from = cumulative_count
-  ) 
+  )
 
 
 
@@ -77,13 +121,56 @@ covid19_confirmed_raw_long |>
 ## ----------------------------------------------------------------------------
 ## DPLYR
 
-# Select County, State, and Country
-covid19_confirmed_raw |> 
-  select(Admin2, Province_State, Country_Region)
+## Part of the data cleaning process involves keeping the minimum variables
+## necessary to be useful, without loosing information. We see that a number of
+## the columns represent information that is already implied or not relevant.
+## For example, UID, or the unique identifier for each row entry, no longer
+## has meaning or contain information we need after pivoting the data long.
+## 
+## We will remove these necessary columns and adjust the remaining variable
+## names so that they are clearer. The data dictionary for the raw
+## data set can be found in the JHU CRC CSSEGISandData GitHub README file:
+## https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data#field-description-1
 
-# Select Latitude, Longitude
-covid19_confirmed_raw |> 
-  select(Lat, Long_)
+colnames(covid19_death_raw_long)
+
+
+## As an aside, the population column denotes one static representation of the
+## U.S. population in that county. This value does not change over the entire
+## span of time represented. This is not ideal, and it is not relevant to
+## the analysis at hand. Students are encouraged to explore our own harmonized
+## U.S. census data where they can better estimate population levels at the
+## state level for various spans of time that can be found in our 
+## JHU-CRC-Vaccinations GitHub page: https://github.com/ysph-dsde/JHU-CRC-Vaccinations
+## 
+## We can confirm this is true by examining the number of times a different
+## population count is represented for unique counties.
+
+expected_count         <- unique(df$date) %>% length()
+diff_population_counts <- table(df$Admin2, df$Population, df$Province_State) %>% as.data.frame()
+
+# The following Boolean test will be TRUE if only one population count is
+# represented for each county over the span of time represented in the data set.
+unique(diff_population_counts$Freq) %in% c(0, expected_count) %>% all()
+
+
+## Now we can select out our desired variables using select().
+
+df <- covid19_death_raw_long |> 
+  select(Admin2, Province_State, Country_Region, Combined_Key, date, cumulative_count)
+
+## We'll adjust the column names so that they are more intuitive.
+
+colnames(df) <- c("County", "Province_State", "Country_Region", "Combined_Key",
+                  "Data", "Deaths_Count_Cumulative")
+
+
+
+
+########################
+## Add rows for state-level and county-level counts.
+
+
 
 # Add county_state variable
 covid19_confirmed_raw |>
@@ -94,12 +181,6 @@ covid19_confirmed_raw |>
 # Filter for the state of Connecticut
 covid19_confirmed_raw |> 
   filter(Province_State == "Connecticut")
-
-# Filter for counties in range of latitude [40, 45] and longitude [-100, -70]
-covid19_confirmed_raw |> 
-  select(Lat, Long_) |> 
-  filter(Lat >= 40 & Lat <= 45) |> 
-  filter(Long_ > -100 & Long_ < -70)
 
 # Find average latitude by State
 covid19_confirmed_raw |> 
