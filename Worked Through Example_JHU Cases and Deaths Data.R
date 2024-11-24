@@ -62,6 +62,7 @@ covid19_death_raw  <- read_csv(file = covid19_death_url, show_col_types = FALSE)
 head(covid19_death_raw)
 dim(covid19_death_raw)
 
+
 ## We see that new observations were added as new columns, so that each row
 ## represents values for one, unique county in the U.S. To tidy the data, we
 ## need to reshape the dates columns as added rows so that columns only
@@ -89,19 +90,6 @@ covid19_death_raw_long <-
 
 head(covid19_death_raw_long)
 dim(covid19_death_raw_long)
-
-## We also see that the newly made column "cumulative_count" is classified as
-## numeric, which is what we hope to see. Unfortunately, the dates column is
-## now classified as a character columns. 
-
-sapply(covid19_death_raw_long, class)
-
-## We can modify the class of variable to a dates class using lubridate from 
-## tidyverse. This package is not covered in this introductory workshop, but
-## those interested to find more can review the package documentation:
-## https://lubridate.tidyverse.org/
-
-covid19_death_raw_long$date <- mdy(covid19_death_raw_long$date)
 
 
 ## It is possible to do the reverse operation as pivot_long(). The following
@@ -146,33 +134,109 @@ colnames(covid19_death_raw_long)
 ## We can confirm this is true by examining the number of times a different
 ## population count is represented for unique counties.
 
-expected_count         <- unique(df$date) %>% length()
-diff_population_counts <- table(df$Admin2, df$Population, df$Province_State) %>% as.data.frame()
+expected_count         <- unique(covid19_death_raw_long$date) |> length()
+diff_population_counts <- table(covid19_death_raw_long$Admin2, 
+                                covid19_death_raw_long$Population, 
+                                covid19_death_raw_long$Province_State) |> 
+                          as.data.frame()
 
 # The following Boolean test will be TRUE if only one population count is
 # represented for each county over the span of time represented in the data set.
-unique(diff_population_counts$Freq) %in% c(0, expected_count) %>% all()
+unique(diff_population_counts$Freq) %in% c(0, expected_count) |> all()
 
 
-## Now we can select out our desired variables using select().
+## Now we can subset the columns for the desired variables using select().
 
-df <- covid19_death_raw_long |> 
+df_subset <- covid19_death_raw_long |> 
   select(Admin2, Province_State, Country_Region, Combined_Key, date, cumulative_count)
 
 ## We'll adjust the column names so that they are more intuitive.
 
-colnames(df) <- c("County", "Province_State", "Country_Region", "Combined_Key",
-                  "Data", "Deaths_Count_Cumulative")
+colnames(df_subset) <- c("County", "Province_State", "Country_Region", "Combined_Key",
+                         "Date", "Deaths_Count_Cumulative")
+
+
+## We would like to see state- and country-level counts Currently, the
+## data set only contains county-level counts. We calculate these values by
+## summing the cumulative counts over entries that have been grouped by
+## "Province_State" and "Date". Then, we do the same operation over all of
+## the U.S. state entries that have been grouped by Date only.
+## 
+## First we start by calculating the state-level data from the county-level data.
+
+counts_by_state <- df_subset |> 
+  # Groups the table by unique entries in "Province_State" followed by "Date".
+  group_by(Province_State, Date) |>
+  # Calculate the cumulative deaths variable by summing over the grouped rows.
+  # Note that .groups = "keep" will maintain the grouping for the summation.
+  summarise(Deaths_Count_Cumulative = sum(Deaths_Count_Cumulative), .groups = "keep") |>
+  # Mutate will generate new columns. These can be functions of existing columns
+  # or static operations additions. For example, we can generate a new
+  # "Combined_Key" for the state-level data that excludes counties using the
+  # strinr concatenate function, str_c().
+  mutate(Country_Region = "US", Combined_Key = str_c(Province_State, ", US"))
+
+
+## Next we calculate the country-level data by summing over all of the U.S.
+## state entries.
+
+counts_by_country <- counts_by_state |> 
+  # Filter subsets the data set by rows that match the condition. This will
+  # subset the data set for entries that are U.S. states.
+  filter(Province_State %in% datasets::state.name) |>
+  # Groups the table by unique entries in "Date".
+  group_by(Date) |>
+  # Calculate the cumulative deaths variable by summing over the grouped rows.
+  summarise(Deaths_Count_Cumulative = sum(Deaths_Count_Cumulative), .groups = "keep") |>
+  # Generate new columns using mutate.
+  mutate(Country_Region = "US", Combined_Key = "US")
+
+
+## Now that we have our state- and country-level data, we need to combine them
+## back into the main data set. bind_rows() is a similar row-add operation
+## to do.call(), but it will fill missing columns with NA for any so that
+## all unique variables are maintained.
+##
+## This package is not covered in this introductory workshop, but those 
+## interested to find out more can review the package documentation: 
+## https://dplyr.tidyverse.org/reference/bind_rows.html
+
+df <- bind_rows(counts_by_country, counts_by_state, df_subset)
+  
+  
+## We can confirm that this operation was successful by examining the first and
+## last few rows.
+
+head(df)
+tail(df)
+
+
+## Now we can clean the columns by removing redundant information and reordering
+## them. With the "Combined_Key", we no longer need "Country_Region", 
+## "Province_State", or "County". Notice that select() will also reorder our
+## columns.
+
+df <- df |> select(Combined_Key, Date, Deaths_Count_Cumulative)
+
+
+## Finally, we will confirm that our variables are set to the correct class.
+
+sapply(df, class)
+
+## Currently, "Date" is classified as a character. We can change the class to a 
+## date using lubridate in tidyverse. This package is not covered in this 
+## introductory workshop, but those interested to find out more can review the 
+## package documentation: https://lubridate.tidyverse.org/
+## 
+## Notice that the data has been reported in mm/dd/yy format. Therefore, we
+## use mdy() to correctly convert the character to date class.
+
+df$Date <- mdy(df$Date)
 
 
 
 
-########################
-## Add rows for state-level and county-level counts.
-
-
-
-# Add county_state variable
+# Add county Deaths_Count_Cumulative# Add county_state variable
 covid19_confirmed_raw |>
   mutate(county_state = paste0(Admin2, ",", Province_State)) |>
   # Select the county_state variable
@@ -181,16 +245,6 @@ covid19_confirmed_raw |>
 # Filter for the state of Connecticut
 covid19_confirmed_raw |> 
   filter(Province_State == "Connecticut")
-
-# Find average latitude by State
-covid19_confirmed_raw |> 
-  group_by(Province_State) |>
-  summarise(avg_lat = mean(Lat))
-
-# Find average longitude by State
-covid19_confirmed_raw |> 
-  group_by(Province_State) |>
-  summarise(avg_long = mean(Long_))
 
 
 
