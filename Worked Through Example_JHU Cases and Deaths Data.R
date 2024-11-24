@@ -76,11 +76,11 @@ colnames(covid19_death_raw)[c(13, ncol(covid19_death_raw))]
 covid19_death_raw_long <- 
   covid19_death_raw |> 
   pivot_longer(
-    # which columns need to be pivoted
+    # Designate which columns need to be pivoted.
     cols = "1/22/20":"3/9/23", 
-    # names variable storing pivoted columns
+    # Name the variable storing pivoted columns.
     names_to = "date",
-    # names the variable stored in cell values
+    # Name the variable stored in cell values.
     values_to = "cumulative_count"
   )
 
@@ -97,9 +97,9 @@ dim(covid19_death_raw_long)
 
 covid19_death_raw_long |> 
   pivot_wider(
-    # which columns have new variable names
+    # Which columns have new variable names
     names_from = date,
-    # column of values for new variables
+    # Column of values for new variables
     values_from = cumulative_count
   )
 
@@ -211,29 +211,6 @@ head(df)
 tail(df)
 
 
-## Now we can clean the columns by removing redundant information and reordering
-## them. With the "Combined_Key", we no longer need "Country_Region", 
-## "Province_State", or "County". Notice that select() will also reorder our
-## columns.
-
-df <- df |> select(Combined_Key, Date, Deaths_Count_Cumulative)
-
-
-## Finally, we will confirm that our variables are set to the correct class.
-
-sapply(df, class)
-
-## Currently, "Date" is classified as a character. We can change the class to a 
-## date using lubridate in tidyverse. This package is not covered in this 
-## introductory workshop, but those interested to find out more can review the 
-## package documentation: https://lubridate.tidyverse.org/
-## 
-## Notice that the data has been reported in mm/dd/yy format. Therefore, we
-## use mdy() to correctly convert the character to date class.
-
-df$Date <- mdy(df$Date)
-
-
 
 
 # Add county Deaths_Count_Cumulative# Add county_state variable
@@ -252,18 +229,8 @@ covid19_confirmed_raw |>
 ## ----------------------------------------------------------------------------
 ## STRINGR
 
-df <- covid19_death_raw %>%
-  # Reshape data from wide to long format, with dates as a single column
-  pivot_longer(cols = "1/22/20":"3/9/23",
-               names_to = "date",
-               values_to = "cumulative_count") %>% as.data.frame()
+## 
 
-total_counts <- aggregate(cumulative_count ~ Province_State + date, data = df[, c(6:8, 11:14)], sum)
-
-
-
-## ----------------------------------------------------------------------------
-## STRINGR EXAMPLE
 
 ## We only need to inspect the "Province_State" entries. We expect that the
 ## U.S. states and territories will be included. We confirm by matching
@@ -312,6 +279,41 @@ df_filtered[, c("Province_State", "Combined_Key_2")] <-
     sapply(x, function(x) 
       str_replace(x,  "Virgin Islands", "U.S. Virgin Islands"))
   })()
+
+
+
+
+## ----------------------------------------------------------------------------
+## GGPLOT
+
+## Now that we have completed tidying our data, we can clean the columns by 
+## removing redundant information and reordering them. With the "Combined_Key", 
+## we no longer need "Country_Region",  "Province_State", or "County". Notice 
+## that select() will also reorder our columns.
+
+df <- df |> select(Combined_Key, Date, Deaths_Count_Cumulative)
+
+
+## Finally, we will confirm that our variables are set to the correct class.
+
+sapply(df, class)
+
+## Currently, "Date" is classified as a character. We can change the class to a 
+## date using lubridate in tidyverse. This package is not covered in this 
+## introductory workshop, but those interested to find out more can review the 
+## package documentation: https://lubridate.tidyverse.org/
+## 
+## Notice that the data has been reported in mm/dd/yy format. Therefore, we
+## use mdy() to correctly convert the character to date class.
+
+df$Date <- mdy(df$Date)
+
+
+
+
+
+
+
 
 
 
