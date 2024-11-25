@@ -8,7 +8,12 @@
 ## R version:    4.4.1
 ## renv version: 1.0.11
 ## 
-## Description: 
+## Description: In this workshop, we will explore the tidyverse collection of R
+##              packages to clean, analyze, and visualize COVID-19 daily death 
+##              counts in the United States. Additionally, we will make our 
+##              visualizations interactive using the plotly() package. This
+##              script is used to clean the data using the concepts taught in
+##              the workshop. Some steps will be advanced for beginners.s
 
 ## ----------------------------------------------------------------------------
 ## SET UP THE ENVIRONMENT
@@ -16,14 +21,14 @@
 
 renv::restore()
 
-library(readr)
-library(tidyr)
-library(dplyr)
-library(stringr)
-library(lubridate)
-library(ggplot2)
-library(lubridate)
-library(plotly)
+library(readr)      # For reading data
+library(tidyr)      # For tidying data 
+library(dplyr)      # For data manipulation 
+library(stringr)    # For string manipulation
+library(ggplot2)    # For creating static visualizations
+library(lubridate)  # For date manipulation 
+library(plotly)     # For interactive plots
+
 
 '%!in%' <- function(x,y)!('%in%'(x,y))
 
@@ -35,14 +40,12 @@ library(plotly)
 
 ## This data is from the COVID-19 Data Repository by the Center for Systems 
 ## Science and Engineering (CSSE) at Johns Hopkins University (JHU), GitHub 
-## CSSEGISandData. Additional details can be found in the project repositories 
+## CSSEGISandData. Additional details can be found in the project repository's 
 ## main directory's README file.
 
-## We load cases and deaths counts directly from their GitHub page using the 
-## raw URL.
-
-covid19_confirmed_url <- "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/refs/heads/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_US.csv"
-covid19_confirmed_raw  <- read_csv(file = covid19_confirmed_url, show_col_types = FALSE)  
+## We will fetch COVID-19 death data from a public GitHub repository and take 
+## a look at its structure.
+## -   read_csv(): Reads the CSV file from the URL into a data frame.
 
 covid19_death_url <- "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/refs/heads/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_US.csv"
 covid19_death_raw  <- read_csv(file = covid19_death_url, show_col_types = FALSE) 
@@ -58,6 +61,7 @@ covid19_death_raw  <- read_csv(file = covid19_death_url, show_col_types = FALSE)
 ## with minor variations.
 ##
 ## First we will inspect the characteristics of our data set.
+## -   head(): Displays the first few rows of the dataset.
 
 head(covid19_death_raw)
 dim(covid19_death_raw)
@@ -75,6 +79,7 @@ colnames(covid19_death_raw)[c(13, ncol(covid19_death_raw))]
 
 covid19_death_raw_long <- 
   covid19_death_raw |> 
+  # Step 1: Convert wide-format date columns to long format
   pivot_longer(
     # Designate which columns need to be pivoted.
     cols = "1/22/20":"3/9/23", 
@@ -82,7 +87,9 @@ covid19_death_raw_long <-
     names_to = "date",
     # Name the variable stored in cell values.
     values_to = "cumulative_count"
-  )
+  ) |> 
+  # Step 2: Remove grouping to work with the full data frame again
+  ungroup()
 
 
 ## Looking again at the top rows and dimensions of the long-form data set shows
@@ -142,6 +149,8 @@ diff_population_counts <- table(covid19_death_raw_long$Admin2,
 
 # The following Boolean test will be TRUE if only one population count is
 # represented for each county over the span of time represented in the data set.
+# The function all() is going to check the vector of Boolean results and confirm
+# if all of the Boolean values are TRUE. If they are, the results will say "TRUE".
 unique(diff_population_counts$Freq) %in% c(0, expected_count) |> all()
 
 
@@ -165,31 +174,37 @@ colnames(df_subset) <- c("County", "Province_State", "Country_Region", "Combined
 ## First we start by calculating the state-level data from the county-level data.
 
 counts_by_state <- df_subset |> 
-  # Groups the table by unique entries in "Province_State" followed by "Date".
+  # Step 1: Groups the table by unique entries in "Province_State" followed 
+  #         by "Date".
   group_by(Province_State, Date) |>
-  # Calculate the cumulative deaths variable by summing over the grouped rows.
-  # Note that .groups = "keep" will maintain the grouping for the summation.
+  # Step 2: Summing "Deaths_Count_Cumulative" over the grouped rows. Note that 
+  #         .groups = "keep" will maintain the grouping for the summation.
   summarise(Deaths_Count_Cumulative = sum(Deaths_Count_Cumulative), .groups = "keep") |>
-  # Mutate will generate new columns. These can be functions of existing columns
-  # or static operations additions. For example, we can generate a new
-  # "Combined_Key" for the state-level data that excludes counties using the
-  # strinr concatenate function, str_c().
-  mutate(Country_Region = "US", Combined_Key = str_c(Province_State, ", US"))
+  # Step 3: Mutate will generate new columns. These can be functions of existing 
+  #         columns or static operations additions. For example, we can generate 
+  #         a new "Combined_Key" for the state-level data that excludes counties 
+  #         using the strinr concatenate function, str_c().
+  mutate(Country_Region = "US", Combined_Key = str_c(Province_State, ", US")) |> 
+  # Step 4: Remove grouping to work with the full data frame again
+  ungroup()
 
 
 ## Next we calculate the country-level data by summing over all of the U.S.
 ## state entries.
 
 counts_by_country <- counts_by_state |> 
-  # Filter subsets the data set by rows that match the condition. This will
-  # subset the data set for entries that are U.S. states.
+  # Step 1: Filter subsets the data set by rows that match the condition. This 
+  #         will subset the data set for entries that are U.S. states.
   filter(Province_State %in% datasets::state.name) |>
-  # Groups the table by unique entries in "Date".
+  # Step 2: Groups the table by unique entries in "Date".
   group_by(Date) |>
-  # Calculate the cumulative deaths variable by summing over the grouped rows.
+  # Step 3: Calculate the cumulative deaths variable by summing over the 
+  #         grouped rows.
   summarise(Deaths_Count_Cumulative = sum(Deaths_Count_Cumulative), .groups = "keep") |>
-  # Generate new columns using mutate.
-  mutate(Country_Region = "US", Combined_Key = "US")
+  # Step 4: Generate new columns using mutate.
+  mutate(Country_Region = "US", Combined_Key = "US") |> 
+  # Step 5: Remove grouping to work with the full data frame again
+  ungroup()
 
 
 ## Now that we have our state- and country-level data, we need to combine them
@@ -202,26 +217,13 @@ counts_by_country <- counts_by_state |>
 ## https://dplyr.tidyverse.org/reference/bind_rows.html
 
 df <- bind_rows(counts_by_country, counts_by_state, df_subset)
-  
-  
+
+
 ## We can confirm that this operation was successful by examining the first and
 ## last few rows.
 
 head(df)
 tail(df)
-
-
-
-
-# Add county Deaths_Count_Cumulative# Add county_state variable
-covid19_confirmed_raw |>
-  mutate(county_state = paste0(Admin2, ",", Province_State)) |>
-  # Select the county_state variable
-  select(county_state)
-
-# Filter for the state of Connecticut
-covid19_confirmed_raw |> 
-  filter(Province_State == "Connecticut")
 
 
 
@@ -251,7 +253,7 @@ df_filtered <- df[!str_detect(df$Province_State, "Princess"), ]
 df_filtered <- df[str_which(df$Province_State, "Princess", negate = TRUE), ]
 
 
-head(df_filtered)
+nrow(df) - nrow(df_filtered)
 
 ## The "Combined_Key" variable combines the "Admin2", "Province_State", and
 ## "Country_Region". We want to generate a new column that does not include
@@ -274,10 +276,16 @@ str_split(df_filtered$Combined_Key, ",", simplify = TRUE, n = 2)[, 2] |> unique(
 
 ## Say we wish to specify that the Virgin Islands entries specify that results
 ## are for the U.S. territory only. We can replace specific strings exactly.
+str_replace(df_filtered[, "Province_State"],  "Virgin Islands", "U.S. Virgin Islands")
+
+str_replace(df_filtered[, "Combined_Key_2"],  "Virgin Islands", "U.S. Virgin Islands")
+
+
 df_filtered[, c("Province_State", "Combined_Key_2")] <- 
-  df_filtered[, c("Province_State", "Combined_Key_2")] |> (\(x) {
-    sapply(x, function(x) 
-      str_replace(x,  "Virgin Islands", "U.S. Virgin Islands"))
+  df_filtered[, c("Province_State", "Combined_Key_2")] |> 
+  (\(x) {
+    sapply(x, function(y) 
+      str_replace(y,  "Virgin Islands", "U.S. Virgin Islands"))
   })()
 
 
@@ -309,6 +317,15 @@ sapply(df, class)
 df$Date <- mdy(df$Date)
 
 
+
+
+
+covid19_death_processed <- covid19_death_intermediate |>  
+  # Step 5: Calculate daily death counts from the cumulative counts
+  mutate(daily_count = c(cumulative_count[1], diff(cumulative_count)))
+
+# Inspect processed data
+head(covid19_death_processed)
 
 
 
