@@ -15,6 +15,15 @@
 ##              script is used to clean the data using the concepts taught in
 ##              the workshop. Some steps will be advanced for beginners and
 ##              covers additional topics not introduced in the workshop.
+## 
+## Sections of the document:
+##      - SET UP THE ENVIRONMENT
+##      - TIDYR
+##      - DPLYR
+##      - STRINGR
+##      - FORMATTING AND CALCULATIONS
+##      - GGPLOT AND PLOTLY
+
 
 ## ----------------------------------------------------------------------------
 ## SET UP THE ENVIRONMENT
@@ -330,7 +339,7 @@ str_split(df_filtered$Combined_Key, ",", simplify = TRUE, n = 2)[, 2] |>
 # "Province_State", and "County" information are succinctly represented there.
 # We can adjust the "Virgin Islands" entries for that column only.
 
-str_replace(df_filtered[, "Combined_Key"],  "Virgin Islands", "U.S. Virgin Islands")
+df_filtered[, "Combined_Key"] <- str_replace(df_filtered[, "Combined_Key"],  "Virgin Islands", "U.S. Virgin Islands")
 
 ## It is possible to adjust multiple columns at once. Notice that with the
 ## base pipe "|>" the standard placeholder "_" does not move information into
@@ -361,7 +370,7 @@ df_filtered[, c("Province_State", "Combined_Key")] |>
 
 
 ## ----------------------------------------------------------------------------
-## GGPLOT
+## FORMATTING AND CALCULATIONS
 
 ## Now that we have completed tidying our data, we can clean the columns by 
 ## removing redundant information and reorder them. With the "Combined_Key", 
@@ -387,19 +396,23 @@ df$Date <- mdy(df$Date)
 
 
 
+## sort the rows for by dates
 
+## confirm monotonically increasing
 
-covid19_death_processed <- covid19_death_intermediate |>  
-  # Step 5: Calculate daily death counts from the cumulative counts
-  mutate(daily_count = c(cumulative_count[1], diff(cumulative_count)))
-
-# Inspect processed data
-head(covid19_death_processed)
+## back calculate the daily counts
 
 
 
 ## ----------------------------------------------------------------------------
-## GGPLOT
+## GGPLOT AND PLOTLY
+
+
+
+
+
+
+
 
 
 
