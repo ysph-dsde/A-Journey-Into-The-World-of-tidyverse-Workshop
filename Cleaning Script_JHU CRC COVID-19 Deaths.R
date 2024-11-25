@@ -13,7 +13,8 @@
 ##              counts in the United States. Additionally, we will make our 
 ##              visualizations interactive using the plotly() package. This
 ##              script is used to clean the data using the concepts taught in
-##              the workshop. Some steps will be advanced for beginners.s
+##              the workshop. Some steps will be advanced for beginners and
+##              covers additional topics not introduced in the workshop.
 
 ## ----------------------------------------------------------------------------
 ## SET UP THE ENVIRONMENT
@@ -48,7 +49,8 @@ library(plotly)     # For interactive plots
 ## -   read_csv(): Reads the CSV file from the URL into a data frame.
 
 covid19_death_url <- "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/refs/heads/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_US.csv"
-covid19_death_raw  <- read_csv(file = covid19_death_url, show_col_types = FALSE) 
+covid19_death_raw  <- read_csv(file = covid19_death_url, show_col_types = FALSE)
+
 
 
 
@@ -57,11 +59,11 @@ covid19_death_raw  <- read_csv(file = covid19_death_url, show_col_types = FALSE)
 
 ## Death counts are expected to be more accurate to the daily count level. For
 ## this example, we will use the deaths data set, however, the confirmed
-## cases data set can also be passed through the following series of operations
-## with minor variations.
+## cases data set from the same repository can be passed through the following
+## series of operations with minor variations.
 ##
 ## First we will inspect the characteristics of our data set.
-## -   head(): Displays the first few rows of the dataset.
+## -   head(): Displays the first few rows of the data set.
 
 head(covid19_death_raw)
 dim(covid19_death_raw)
@@ -79,7 +81,7 @@ colnames(covid19_death_raw)[c(13, ncol(covid19_death_raw))]
 
 covid19_death_raw_long <- 
   covid19_death_raw |> 
-  # Step 1: Convert wide-format date columns to long format
+  # Step 1: Convert wide-format date columns to long-format.
   pivot_longer(
     # Designate which columns need to be pivoted.
     cols = "1/22/20":"3/9/23", 
@@ -88,8 +90,10 @@ covid19_death_raw_long <-
     # Name the variable stored in cell values.
     values_to = "cumulative_count"
   ) |> 
-  # Step 2: Remove grouping to work with the full data frame again
-  ungroup()
+  # Step 2: Remove grouping to work with the full data frame again.
+  ungroup() |> 
+  # Step 3: Change table format to "data frame" for convenience.
+  as.data.frame()
 
 
 ## Looking again at the top rows and dimensions of the long-form data set shows
@@ -100,7 +104,7 @@ dim(covid19_death_raw_long)
 
 
 ## It is possible to do the reverse operation as pivot_long(). The following
-## code demonstrates how to reoritent the code from a long to wide format.
+## code demonstrates how to reorient the code from a long to wide format.
 
 covid19_death_raw_long |> 
   pivot_wider(
@@ -122,9 +126,9 @@ covid19_death_raw_long |>
 ## For example, UID, or the unique identifier for each row entry, no longer
 ## has meaning or contain information we need after pivoting the data long.
 ## 
-## We will remove these necessary columns and adjust the remaining variable
-## names so that they are clearer. The data dictionary for the raw
-## data set can be found in the JHU CRC CSSEGISandData GitHub README file:
+## We will remove these unnecessary columns and adjust the remaining variable
+## names so that they are clearer. The data dictionary for the raw data set can
+## be found in the JHU CRC CSSEGISandData GitHub README file:
 ## https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data#field-description-1
 
 colnames(covid19_death_raw_long)
@@ -135,41 +139,45 @@ colnames(covid19_death_raw_long)
 ## span of time represented. This is not ideal, and it is not relevant to
 ## the analysis at hand. Students are encouraged to explore our own harmonized
 ## U.S. census data where they can better estimate population levels at the
-## state level for various spans of time that can be found in our 
+## state level for various spans of time. This can be found in our 
 ## JHU-CRC-Vaccinations GitHub page: https://github.com/ysph-dsde/JHU-CRC-Vaccinations
 ## 
-## We can confirm this is true by examining the number of times a different
-## population count is represented for unique counties.
-
+## We can confirm that our interpretation of the "Population" column is true by 
+## examining the number of times a different population count is represented 
+## for unique counties.
+ 
 expected_count         <- unique(covid19_death_raw_long$date) |> length()
 diff_population_counts <- table(covid19_death_raw_long$Admin2, 
                                 covid19_death_raw_long$Population, 
                                 covid19_death_raw_long$Province_State) |> 
                           as.data.frame()
 
+
 # The following Boolean test will be TRUE if only one population count is
 # represented for each county over the span of time represented in the data set.
 # The function all() is going to check the vector of Boolean results and confirm
 # if all of the Boolean values are TRUE. If they are, the results will say "TRUE".
+
 unique(diff_population_counts$Freq) %in% c(0, expected_count) |> all()
 
 
 ## Now we can subset the columns for the desired variables using select().
 
 df_subset <- covid19_death_raw_long |> 
-  select(Admin2, Province_State, Country_Region, Combined_Key, date, cumulative_count)
+  select(Admin2, Province_State, Country_Region, Combined_Key, 
+         date, cumulative_count)
 
 ## We'll adjust the column names so that they are more intuitive.
 
-colnames(df_subset) <- c("County", "Province_State", "Country_Region", "Combined_Key",
-                         "Date", "Deaths_Count_Cumulative")
+colnames(df_subset) <- c("County", "Province_State", "Country_Region", 
+                         "Combined_Key", "Date", "Deaths_Count_Cumulative")
 
 
 ## We would like to see state- and country-level counts Currently, the
 ## data set only contains county-level counts. We calculate these values by
 ## summing the cumulative counts over entries that have been grouped by
 ## "Province_State" and "Date". Then, we do the same operation over all of
-## the U.S. state entries that have been grouped by Date only.
+## the U.S. state entries that have been grouped by "Date" only.
 ## 
 ## First we start by calculating the state-level data from the county-level data.
 
@@ -181,9 +189,9 @@ counts_by_state <- df_subset |>
   #         .groups = "keep" will maintain the grouping for the summation.
   summarise(Deaths_Count_Cumulative = sum(Deaths_Count_Cumulative), .groups = "keep") |>
   # Step 3: Mutate will generate new columns. These can be functions of existing 
-  #         columns or static operations additions. For example, we can generate 
-  #         a new "Combined_Key" for the state-level data that excludes counties 
-  #         using the strinr concatenate function, str_c().
+  #         columns or static operations. For example, we can generate a new
+  #         "Combined_Key" for the state-level data that excludes counties 
+  #         using the stringr concatenate function, str_c().
   mutate(Country_Region = "US", Combined_Key = str_c(Province_State, ", US")) |> 
   # Step 4: Remove grouping to work with the full data frame again
   ungroup()
@@ -208,15 +216,15 @@ counts_by_country <- counts_by_state |>
 
 
 ## Now that we have our state- and country-level data, we need to combine them
-## back into the main data set. bind_rows() is a similar row-add operation
-## to do.call(), but it will fill missing columns with NA for any so that
-## all unique variables are maintained.
+## back into the main data set. bind_rows() is a tidyverse function that is 
+## similar to do.call(), but it will also fill missing columns with NA so that
+## the maximum number of uniquely defined variables are maintained.
 ##
 ## This package is not covered in this introductory workshop, but those 
 ## interested to find out more can review the package documentation: 
 ## https://dplyr.tidyverse.org/reference/bind_rows.html
 
-df <- bind_rows(counts_by_country, counts_by_state, df_subset)
+df <- bind_rows(counts_by_country, counts_by_state, df_subset) %>% as.data.frame()
 
 
 ## We can confirm that this operation was successful by examining the first and
@@ -231,19 +239,33 @@ tail(df)
 ## ----------------------------------------------------------------------------
 ## STRINGR
 
+## After completing bulk data cleaning operations, like the ones completed above,
+## it is good practice to examine variable classifications and nomenclature
+## before any calculations. For example, if you have a variable for the sex
+## of a participant, you will want to confirm that all entries of that variable
+## say "M" and "F" for Male and Female, respectively. You might also need to
+## confirm that zero's are not being used in place of NA's when the value is
+## not determined.
 ## 
-
-
-## We only need to inspect the "Province_State" entries. We expect that the
-## U.S. states and territories will be included. We confirm by matching
-## the unique entries of "Province_State" and datasets::state.name.
+## In this data set, we are going to assume the county-level entries are correct.
+## Therefore, we only need to inspect "Province_State". We expect that the
+## U.S. states and territories will be included. We can examine this by matching
+## unique entries of "Province_State" and datasets::state.name.
 
 unique(df$Province_State) %>% .[. %!in% datasets::state.name]
 
 
-## They included entries for the two cruise ships. We do not need to consider
-## these so we use str_detect() to remove rows where this information is
-## included. Two methods using stringr are shown:
+## Notice that there are "NA's". This should be correct, since the country-level
+## counts are NA at the state-level. We can confirm this by showing all
+## "Combined_Key" entries are "US" for rows with "Province_State" = NA's.
+
+df[df$Province_State %in% NA, "Combined_Key"] |> unique()
+
+
+## In addition to the District of Columbia and five U.S. territories, there
+## are entries for two cruise ships. These are not relevant to our analysis,
+## and so we exclude them using str_detect() or str_which() to find strings
+## with "Princess" in them. These two methods using stringr are shown:
 
 # Option #1: Use the Boolean test that detects the "Princess" string.
 df_filtered <- df[!str_detect(df$Province_State, "Princess"), ]
@@ -253,40 +275,87 @@ df_filtered <- df[!str_detect(df$Province_State, "Princess"), ]
 df_filtered <- df[str_which(df$Province_State, "Princess", negate = TRUE), ]
 
 
+## Doing this removes the following number of rows from the larger data set.
+
 nrow(df) - nrow(df_filtered)
 
-## The "Combined_Key" variable combines the "Admin2", "Province_State", and
-## "Country_Region". We want to generate a new column that does not include
-## "Admin2". Two methods using stringr are shown:
+
+## The "Combined_Key" variable combines "County", "Province_State", and
+## "Country_Region". Earlier the in code, we generated the new "Combined_Key"
+## entries for the state- and country-level data using mutate() and str_c().
+## Assume we only have the county-level data and wish to generate the
+## state- and country-level "Combined_Key" variable. We can do this in
+## two ways: str_c() or str_split().
+##
+## For this example we will subset the data by county-level information only. We
+## use str_count() to represent the number of times a string pattern is detected
+## within any given string. County-level data will have two commas, so this is
+## one method we can use to subset our data.
+
+df_county <- df_filtered[str_count(df_filtered$Combined_Key, ",") == 2, ]
 
 # Option #1: Generate a new column by combining the desired columns with ", "
 #            as the separator.
-df_filtered$Combined_Key_2 <- str_c(df_filtered$Province_State, 
-                                    df_filtered$Country_Region, sep = ", ")
+str_c(df_county$Province_State, df_county$Country_Region, sep = ", ")
 
 # Option #2: Split the string only to the first observation of the string match.
-str_split(df_filtered$Combined_Key, ",", simplify = TRUE, n = 2)[, 2] |> unique()
+str_split(df_county$Combined_Key, ",", simplify = TRUE, n = 2)[, 2] |> 
+  str_trim(side = "both") |> unique()
 
-# While Option #2 works in principle, and is demonstrated here, we see that there
-# are significant inconsistencies with formatting in the "Combined_Key" column
-# For example, some names have spaces between commas and some lack spaces.
-# Here we will only save the results of combining the two columns.
+## While Option #2 works in principle, and is demonstrated here, we see that
+## there are significant inconsistencies with formatting in the "Combined_Key"
+## column. For example, some names have spaces between commas and some lack
+## spaces. We can reconcile these problems by regenerating the "Combined_Key"
+## for county-level entries in the main data set.
+
+index = which(str_count(df_filtered$Combined_Key, ",") == 2)
+
+df_filtered[index, "Combined_Key"] <- str_c(df_filtered[index, "County"], 
+                                            df_filtered[index, "Province_State"], 
+                                            df_filtered[index, "Country_Region"], 
+                                            sep = ", ")
+
+# To confirm this worked, we can rerun the str_split() command and see that
+# there are no more duplicated entries detected on account of formatting
+# variations.
+str_split(df_filtered$Combined_Key, ",", simplify = TRUE, n = 2)[, 2] |> 
+  str_trim(side = "both") |> unique()
 
 
+## Say we wish to specify that the Virgin Islands entries only reflect results
+## for the U.S. territory. We can replace specific strings exactly using
+## str_replace().
 
-## Say we wish to specify that the Virgin Islands entries specify that results
-## are for the U.S. territory only. We can replace specific strings exactly.
-str_replace(df_filtered[, "Province_State"],  "Virgin Islands", "U.S. Virgin Islands")
+# Going forward, we only require the "Combined_Key" variable, as "Country_Region",
+# "Province_State", and "County" information are succinctly represented there.
+# We can adjust the "Virgin Islands" entries for that column only.
 
-str_replace(df_filtered[, "Combined_Key_2"],  "Virgin Islands", "U.S. Virgin Islands")
+str_replace(df_filtered[, "Combined_Key"],  "Virgin Islands", "U.S. Virgin Islands")
 
+## It is possible to adjust multiple columns at once. Notice that with the
+## base pipe "|>" the standard placeholder "_" does not move information into
+## the sapply() function. To fix this, we wrap the sapply() pipe level and
+## specify a placeholder for the values being passed from the left-side
+## to sapply(). In this scenario, we are calling that information "x". 
+##
+## sapply() is one of a few useful functions that repeat operations over 
+## columns, rows, or lists. sapply() will only apply the function over a
+## data frames columns.
 
-df_filtered[, c("Province_State", "Combined_Key_2")] <- 
-  df_filtered[, c("Province_State", "Combined_Key_2")] |> 
+# Identify the row indices where "Virgin Islands" is detected in column
+# "Province_State".
+index = str_which(df_filtered[, c("Province_State")], "Virgin Islands")
+
+df_filtered[, c("Province_State", "Combined_Key")] |> 
+  # Define the wrapper of this pipe-level and specify the information from
+  # the left to be "x".
   (\(x) {
+    # Apply the str_replace() function over "Province_State" and "Combined_Key".
     sapply(x, function(y) 
       str_replace(y,  "Virgin Islands", "U.S. Virgin Islands"))
-  })()
+  })() |> 
+  # Show that the changes have been completed.
+  _[index[1:15], ]
 
 
 
@@ -295,7 +364,7 @@ df_filtered[, c("Province_State", "Combined_Key_2")] <-
 ## GGPLOT
 
 ## Now that we have completed tidying our data, we can clean the columns by 
-## removing redundant information and reordering them. With the "Combined_Key", 
+## removing redundant information and reorder them. With the "Combined_Key", 
 ## we no longer need "Country_Region",  "Province_State", or "County". Notice 
 ## that select() will also reorder our columns.
 
@@ -329,7 +398,8 @@ head(covid19_death_processed)
 
 
 
-
+## ----------------------------------------------------------------------------
+## GGPLOT
 
 
 
