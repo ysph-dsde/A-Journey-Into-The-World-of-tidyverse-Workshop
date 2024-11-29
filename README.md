@@ -58,7 +58,7 @@ The repository needs to be copied into your personal GitHub for the workshop in 
 
 These directions follow GitHub's [duplicating a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/duplicating-a-repository) page.
 
-1. [Create a new](https://github.com/new) GitHub repository ([Further documentation](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-new-repository)).
+1. [Create a new](https://github.com/new) GitHub repository ([further documentation](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-new-repository)).
    
    **NOTE:** Do not use a template or include a description, README file, .gitignore, or license. Only adjust the GitHub account owner as needed and create the name for the new repository. We recommend initially setting the repository to Private.
    
@@ -80,7 +80,7 @@ These directions follow GitHub's [duplicating a repository](https://docs.github.
    
 5. Open the project file.
    ```
-   cd "JHU-CRC-Vaccinations.git"
+   cd "A-Journey-Into-The-World-of-tidyverse-Workshop.git"
    ```
    
 6. Push a mirror of the cloned Git file to your newly created GitHub repository.
