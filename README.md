@@ -72,10 +72,10 @@ These directions follow GitHub's [duplicating a repository](https://docs.github.
 4. Clone a bare copy of the repository.
    ```
    # using SSH
-   git clone --bare git@github.com:ysph-dsde/JHU-CRC-Vaccinations.git
+   git clone --bare git@github.com:ysph-dsde/A-Journey-Into-The-World-of-tidyverse-Workshop.git
    
    # or using HTTPS
-   git clone --bare https://github.com/ysph-dsde/JHU-CRC-Vaccinations.git
+   git clone --bare https://github.com/ysph-dsde/A-Journey-Into-The-World-of-tidyverse-Workshop.git
    ```
    
 5. Open the project file.
@@ -94,8 +94,8 @@ These directions follow GitHub's [duplicating a repository](https://docs.github.
 
 7. Delete the bare cloned file used to create a new remote repository.
    ```
-   cd ..                                    # Go back one file location
-   rm -rf JHU-CRC-Vaccinations.git          # Delete the bare clone
+   cd ..                                                              # Go back one file location
+   rm -rf A-Journey-Into-The-World-of-tidyverse-Workshop.git          # Delete the bare clone
    ```
 8. Proceed with cloning the newly copied repository.
 
@@ -132,8 +132,8 @@ Now that you have copied this repository into your own GitHub, you are ready to 
 ### Initializing the Environment
 
 1. Open the newly cloned file.
-2. Launch the project by opening `JHU-CRC-Vaccinations.Rproj`.
-3. Open `Analysis Script_Vaccinations Time-Series Plot.R`.
+2. Launch the project by opening `A-Journey-Into-The-World-of-tidyverse-Workshop.Rproj`.
+3. Open `_______`.
 4. In the R console, activate the enviroment by runing:
     ```
     renv::restore()
