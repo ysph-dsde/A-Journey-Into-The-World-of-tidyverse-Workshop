@@ -1,0 +1,44 @@
+---
+  title: "Worked Through Example"
+  format: html
+  editor: visual
+  markdown: 
+  editor_options: 
+  chunk_output_type: console
+---
+
+## Introduction
+
+In this workshop, we will explore the **tidyverse** collection of R packages to clean, analyze, and visualize COVID-19 daily death counts in the United States. Additionally, we will make our visualizations interactive using the `plotly` package.
+
+## Setup
+
+First, we will load the necessary libraries and any special functions used in the script.
+
+```{r message = FALSE, warning = FALSE}
+library(readr)      # For reading in the data
+library(tidyr)      # For tidying data 
+library(dplyr)      # For data manipulation 
+library(stringr)    # For string manipulation
+library(lubridate)  # For date manipulation
+library(ggplot2)    # For creating static visualizations
+library(plotly)     # For interactive plots
+library(scales)     # For formatting plots axis
+
+
+# Function to select "Not In"
+'%!in%' <- function(x,y)!('%in%'(x,y))
+```
+
+We will also fetch the semi-cleaned COVID-19 death data set that has been prepared for this example. The original, raw data comes from the Johns Hopkins University Coronavirus Resource Center (JHU CRC) Center for Systems Science and Engineering (CSSE) cases and deaths, available on their GitHub page: CSSEGISandData. The full data cleaning script can be found in the GitHub page for this workshop.
+
+```{r}
+# Read COVID-19 death data
+covid19_death_url <- "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/refs/heads/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_US.csv"
+covid19_death_raw  <- read_csv(file = covid19_death_url)
+
+# Inspect the data
+head(covid19_death_raw)
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).

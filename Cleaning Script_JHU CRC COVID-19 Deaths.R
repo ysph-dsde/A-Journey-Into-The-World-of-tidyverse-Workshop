@@ -14,7 +14,10 @@
 ##              visualizations interactive using the plotly() package. This
 ##              script is used to clean the data using the concepts taught in
 ##              the workshop. Some steps will be advanced for beginners and
-##              covers additional topics not introduced in the workshop.
+##              covers additional topics not introduced in the workshop. Those
+##              interested in an introduction to the tidyverse will want to
+##              refer to the appended version of these operations used in the
+##              workshop and the challenge questions for practice.
 
 
 ## ----------------------------------------------------------------------------
@@ -33,6 +36,7 @@ library(plotly)     # For interactive plots
 library(scales)     # For formatting plots axis
 
 
+# Function to select "Not In"
 '%!in%' <- function(x,y)!('%in%'(x,y))
 
 
@@ -50,8 +54,8 @@ library(scales)     # For formatting plots axis
 ## a look at its structure.
 ## -   read_csv(): Reads the CSV file from the URL into a data frame.
 
-covid19_death_url <- "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/refs/heads/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_US.csv"
-covid19_death_raw  <- read_csv(file = covid19_death_url, show_col_types = FALSE)
+covid19_death_url  <- "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/refs/heads/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_US.csv"
+covid19_death_raw  <- read_csv(file = covid19_death_url) #, show_col_types = FALSE)
 
 
 
@@ -345,7 +349,7 @@ str_split(df_filtered$Combined_Key, ",", simplify = TRUE, n = 2)[, 2] |>
 ## represented there. We can adjust the "Virgin Islands" entries for that 
 ## column only.
 
-df_filtered[, "Combined_Key"] <- str_replace(df_filtered[, "Combined_Key"],  "Virgin Islands", "U.S. Virgin Islands")
+df_filtered[, "Combined_Key"] <- str_replace(df_filtered[, "Combined_Key"],  "Virgin Islands", "US Virgin Islands")
 
 
 ## Note that it is possible to adjust multiple columns at once. Notice that with
@@ -369,7 +373,7 @@ df_filtered[index, c("Province_State", "Combined_Key")] |>
     # Apply the str_replace() function over "Province_State" and "Combined_Key".
     # Notice that the added "^ " is a regex statement that defines a hard
     # boundary on the string.
-    sapply(x, function(y) str_replace(y,  "^Virgin Islands", "U.S. Virgin Islands"))
+    sapply(x, function(y) str_replace(y,  "^Virgin Islands", "US Virgin Islands"))
   }) () |> 
   # Show that the changes have been completed.
   _[1:15, ]
@@ -551,7 +555,7 @@ df[str_detect(df$Combined_Key, "Virgin Islands"), "Combined_Key"]   |> unique()
 ## anything that was done earlier, and can simply remove the duplicates here.
 
 # distinct() is a dplyr function that will remove duplicated rows.
-df <- df |> distinct(.keep_all = TRUE)
+df <- df |> distinct(.keep_all = TRUE) |> `rownames<-`(NULL)
 
 ## We can double check that all unique "Combined_Key" entries are only represented
 ## once by checking their length is 1143, the expected length of dates covered.
@@ -666,7 +670,7 @@ df_final |>
 # Create a new vector that rounds "Dates" down to the nearest month.
 df_monthly <- df_final |>
   # Group the values by month using lubridate to generate a new column with the
-  # month for a respective daily count entry.
+  # month for a respective daily entry.
   group_by(month = lubridate::floor_date(Date, "month")) |> 
   # Remove the grouping and classify as a data frame.
   ungroup() |> as.data.frame()
