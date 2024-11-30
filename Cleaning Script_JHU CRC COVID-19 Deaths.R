@@ -31,7 +31,7 @@ library(tidyr)      # For tidying data
 library(dplyr)      # For data manipulation 
 library(stringr)    # For string manipulation
 library(ggplot2)    # For creating static visualizations
-library(lubridate)  # For date manipulation 
+library(lubridate)  # For date manipulation
 library(plotly)     # For interactive plots
 library(scales)     # For formatting plots axis
 
@@ -95,9 +95,7 @@ covid19_death_raw_long <-
     # Name the variable that will store respective cell values.
     values_to = "cumulative_count"
   ) |> 
-  # Step 2: Remove grouping to work with the full data frame again.
-  ungroup() |> 
-  # Step 3: Change table format to "data frame" for convenience.
+  # Step 2: Change table format to "data frame" for convenience.
   as.data.frame()
 
 
@@ -249,7 +247,7 @@ tail(df)
 ## ----------------------------------------------------------------------------
 ## STRINGR
 
-## After completing bulk data cleaning operations, like the ones completed above,
+## After completing bulk data wrangling operations, like the ones completed above,
 ## it is good practice to examine variable classifications and nomenclature
 ## before any calculations. For example, if you have a variable for the sex
 ## of a participant, you will want to confirm that all entries of that variable

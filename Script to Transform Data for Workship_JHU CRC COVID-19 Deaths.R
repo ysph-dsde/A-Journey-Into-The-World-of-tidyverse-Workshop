@@ -135,6 +135,46 @@ df <- df[!str_detect(df$Combined_Key, "^US"), ] |> `rownames<-`(NULL)
 df[str_detect(df$Combined_Key, "Virgin Islands"), "Combined_Key"] <- "Virgin Islands, US"
 
 
+## Another necessary element is to split the "Combined_Key" into three columns
+## representing the value (if present) of that regional level. We do this
+## by iterating str_split() over subsets based on what regional level the
+## entry represents.
+
+# Generate an empty data frame that will be filled.
+empty_data <- data.frame("County" = rep(NA, nrow(df)), 
+                         "Province_State" = rep(NA, nrow(df)), 
+                         "Country_Region" = rep("US", nrow(df)))
+
+# Combine the empty data frame into the main one.
+df <- cbind(df[, 1, drop = FALSE], empty_data, df[, 2:ncol(df)])
+
+
+for(i in 1:2) {
+  # Search for which index corresponds with the county- or state-level of information.
+  index = which(str_count(df$Combined_Key, ",") == i)
+  
+  if(i < 2) {
+    # When the index indicates state-level, only fill in the "Province_State"
+    # variable.
+    df[index, "Province_State"] <- df[index, "Combined_Key"] |> 
+      str_split(",", simplify = TRUE, n = 2) |> 
+      _[, 1]
+    
+  } else{
+    # When the index indicates county-level, fill in both the "Province_State"
+    # and "County" columns.
+    split_result <- df[index, "Combined_Key"] |> 
+      str_split(",", simplify = TRUE, n = 3)
+    
+    df[index, "County"] <- split_result |> _[, 1]
+    
+    df[index, "Province_State"] <- split_result |> _[, 2] |>
+      str_trim(side = "both")
+  }
+}
+
+
+
 
 
 ## ----------------------------------------------------------------------------
