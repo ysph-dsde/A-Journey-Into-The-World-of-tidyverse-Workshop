@@ -14,7 +14,7 @@
 ##              to reintroduce limited messy aspects that can be cleaned
 ##              in a straightforward way in the workshop. For those interested
 ##              in reviewing the full cleaning process, they will need to
-##              refer to the Cleaning Script_JHU CRC COVID-19 Deaths.R file.
+##              refer to the "Cleaning Script_JHU CRC COVID-19 Deaths.R" file.
 
 
 ## ----------------------------------------------------------------------------
@@ -123,16 +123,16 @@ ships <- maxCumulative |>
 df <- bind_rows(df, ships)
 
 
-## In the workshop, the total US counts were calculated by summing over all of
-## the states. We will remove the existing US counts.
-
-df <- df[!str_detect(df$Combined_Key, "^US"), ] |> `rownames<-`(NULL)
-
-
 ## We will also change the string for the Virgin Islands so that it is not
 ## specified to be the US Virgin Islands
 
 df[str_detect(df$Combined_Key, "Virgin Islands"), "Combined_Key"] <- "Virgin Islands, US"
+
+
+## In the workshop, the total US counts were calculated by summing over all of
+## the states. We will remove the existing US counts.
+
+df <- df[!str_detect(df$Combined_Key, "^US"), ] |> `rownames<-`(NULL)
 
 
 ## Another necessary element is to split the "Combined_Key" into three columns
