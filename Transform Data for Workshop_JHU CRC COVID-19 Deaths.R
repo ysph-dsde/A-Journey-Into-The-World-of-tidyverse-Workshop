@@ -40,7 +40,7 @@ library(lubridate)  # For date manipulation
 ## LOAD IN THE DATA
 
 # Read COVID-19 death data
-cleaned_url <- "https://raw.githubusercontent.com/ysph-dsde/A-Journey-Into-The-World-of-tidyverse-Workshop/refs/heads/main/COVID-19%20Deaths_Cleaned_Aggregated%20by%20Month.csv"
+cleaned_url <- "https://raw.githubusercontent.com/ysph-dsde/A-Journey-Into-The-World-of-tidyverse-Workshop/refs/heads/main/Data%20Sets/COVID-19%20Deaths_Cleaned_Aggregated%20by%20Month.csv"
 cleaned     <- read_csv(file = cleaned_url) #, show_col_types = FALSE)
 
 covid19_death_url <- "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/refs/heads/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_US.csv"
