@@ -104,7 +104,6 @@ Let's say we want to plot deaths as a result of the COVID-19 pandemic for the wh
 
 `dplyr` provides us with a series of functions that allow us to do such data manipulation tasks. Over the next four code blocks, we will show how to generate counts for the whole U.S.
 
-
 ### Calculate total U.S. counts
 
 Recall that the imported data set includes values for U.S. counties, states, and territories. We need to calculate U.S. values over the U.S. states, including the District of Columbia, only. This can be achieved by first filtering for `Combined_Key` entries that match those state names using `filter()`.
@@ -191,7 +190,6 @@ df <- df |>
 head(df)
 ```
 
-
 ### Backcalculate monthly updates
 
 Now we are ready to calculate the monthly death counts from the cumulative counts. Earlier we implied that `mutate()` can be used to generate new columns that are functions of existing columns. Here, we generate a new vector using `diff()` to back-calculated values added each month.
@@ -219,7 +217,6 @@ Notice that the data has been reported in yyyy/mm/dd format. Therefore, we use `
 df$Date <- ymd(df$Date)
 ```
 
-
 ## String manipulation using stringr
 
 After completing bulk data wrangling operations, like the ones completed above, it is good practice to examine variable classifications and nomenclature before any calculations. For example, if you have a variable for the sex of a participant, you will want to confirm that all entries of that variable say `"M"` and `"F"` for Male and Female, respectively. You might also need to confirm that zero's are not being used in place of `NA` when the value is not determined.
@@ -233,11 +230,9 @@ unique(df$Province_State)[unique(df$Province_State) %!in% c(datasets::state.name
 
 Notice that there are `NA` detected. This should be correct, since the country-level counts are `NA` at the state-level. We can confirm this by showing all `Combined_Key` entries are "US" for rows with `"Province_State" = NA`.
 
-
 ```{r}
 df[df$Province_State %in% NA, "Combined_Key"] |> unique()
 ```
-
 
 In addition to the five U.S. territories, there are entries for two cruise ships. These are not relevant to our analysis, and so we exclude them using `str_detect()` or `str_which()`. Both of these functions will find the rows where a string pattern is matched, and report the findings as either a Boolean (`TRUE`/`FALSE`) or row-index.
 
@@ -270,11 +265,13 @@ df_county <- df_filtered[str_count(df_filtered$Combined_Key, ",") == 2, ]
 ```
 
 **Option #1:** Generate a new column by combining the desired columns with `", "` as the separator.
+
 ```{r}
 str_c(df_county$Province_State, df_county$Country_Region, sep = ", ") |> unique()
 ```
 
 **Option #2:** Split the string only to the first observation of the string match.
+
 ```{r}
 str_split(df_county$Combined_Key, ",", simplify = TRUE, n = 2)[, 2] |> 
   str_trim(side = "both") |> unique()
@@ -288,11 +285,9 @@ Going forward, we only require the `Combined_Key` variable, as the `Country_Regi
 df_filtered[, "Combined_Key"] <- str_replace(df_filtered[, "Combined_Key"],  "Virgin Islands", "US Virgin Islands")
 ```
 
-
 ### Bonus: Iterating Operations Over Columns
 
-
-Note that it is possible to adjust multiple columns at once using `sapply()`. Notice that with the base pipe `|>` the standard placeholder `_` does not move information into the `sapply()` function. To fix this, we wrap the `sapply()` pipe level and specify a placeholder for the values being passed from the left-side to `sapply()`. In this scenario, we are calling that information `x`. 
+Note that it is possible to adjust multiple columns at once using `sapply()`. Notice that with the base pipe `|>` the standard placeholder `_` does not move information into the `sapply()` function. To fix this, we wrap the `sapply()` pipe level and specify a placeholder for the values being passed from the left-side to `sapply()`. In this scenario, we are calling that information `x`.
 
 `sapply()` is one of a few useful functions that repeats operations over columns, rows, or lists. `sapply()` will only apply the function over a the columns of a data frame.
 
@@ -313,11 +308,9 @@ df_filtered[index, c("Province_State", "Combined_Key")] |>
   _[1:15, ]
 ```
 
-
 ## Visualization: Daily COVID-19 Death Counts
 
 We will calculate the daily COVID-19 death counts across the U.S. and create a line plot showing the daily COVID-19 death counts in the U.S.
-
 
 ```{r}
 
@@ -343,9 +336,4 @@ ggplotly(plot_deaths)
 ## Challenge Questions
 
 1.  Filter the `df` data set to include only rows from 2021.
-2.  With the data set filtered for rows from 2021, determine the day with
-    the highest death count along with the corresponding count.
-
-
-
-
+2.  With the data set filtered for rows from 2021, determine the day with the highest death count along with the corresponding count.
