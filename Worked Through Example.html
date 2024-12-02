@@ -135,7 +135,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Now we will fetch the semi-cleaned COVID-19 deaths data set that has been prepared for this example. The original, raw data comes from the Johns Hopkins University Coronavirus Resource Center (JHU CRC) Center for Systems Science and Engineering (CSSE) GitHub page: CSSEGISandData. The full data cleaning script and links to the original raw data set can be found in the GitHub page for this workshop.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Save the GitHub raw URL associated with our data set.</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>df_url  <span class="ot">&lt;-</span> <span class="st">"https://raw.githubusercontent.com/ysph-dsde/A-Journey-Into-The-World-of-tidyverse-Workshop/refs/heads/main/Data%20for%20the%20Workshop_Aggregated%20by%20Month.csv"</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>df_url  <span class="ot">&lt;-</span> <span class="st">"https://raw.githubusercontent.com/ysph-dsde/A-Journey-Into-The-World-of-tidyverse-Workshop/refs/heads/main/Data%20Sets/Data%20for%20the%20Workshop_Aggregated%20by%20Month.csv"</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Read in the data set using the URL via the readr package.</span></span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>df_raw  <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="at">file =</span> df_url, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -289,20 +289,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Right now, the data frame <code>df_US</code> is missing the <code>Combined_Key</code> column. If we use <code>bind_rows()</code> at this stage, then <code>Combined_Key</code> for all U.S. rows will be <code>NA</code>. Instead, we want to add a new <code>Combined_Key</code> that says <code>"US"</code>. This is achieved using <code>mutate()</code>, which generates a new column using a functions of existing columns or static operations.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>df_US <span class="ot">&lt;-</span> df_US <span class="sc">|&gt;</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Combined_Key =</span> <span class="st">"US"</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Combined_Key =</span> <span class="st">"US"</span>, <span class="at">Country_Region =</span> <span class="st">"US"</span>)</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Inspect the mutated data.</span></span>
 <span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(df_US)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 6 × 3
-  Date       Deaths_Count_Cumulative Combined_Key
-  &lt;chr&gt;                        &lt;dbl&gt; &lt;chr&gt;       
-1 2020-01-01                       1 US          
-2 2020-02-01                       2 US          
-3 2020-03-01                    5335 US          
-4 2020-04-01                   66500 US          
-5 2020-05-01                  107705 US          
-6 2020-06-01                  127302 US          </code></pre>
+<pre><code># A tibble: 6 × 4
+  Date       Deaths_Count_Cumulative Combined_Key Country_Region
+  &lt;chr&gt;                        &lt;dbl&gt; &lt;chr&gt;        &lt;chr&gt;         
+1 2020-01-01                       1 US           US            
+2 2020-02-01                       2 US           US            
+3 2020-03-01                    5335 US           US            
+4 2020-04-01                   66500 US           US            
+5 2020-05-01                  107705 US           US            
+6 2020-06-01                  127302 US           US            </code></pre>
 </div>
 </div>
 <p>Great, now that we have all the columns we need, we are ready to merge it with <code>df_long</code>, which contains all of the county- and state-level data.</p>
@@ -314,14 +314,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Inspect the merged data.</span></span>
 <span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>        Date Deaths_Count_Cumulative Combined_Key County Province_State
-1 2020-01-01                       1           US   &lt;NA&gt;           &lt;NA&gt;
-2 2020-02-01                       2           US   &lt;NA&gt;           &lt;NA&gt;
-3 2020-03-01                    5335           US   &lt;NA&gt;           &lt;NA&gt;
-4 2020-04-01                   66500           US   &lt;NA&gt;           &lt;NA&gt;
-5 2020-05-01                  107705           US   &lt;NA&gt;           &lt;NA&gt;
-6 2020-06-01                  127302           US   &lt;NA&gt;           &lt;NA&gt;
-  Country_Region
+<pre><code>        Date Deaths_Count_Cumulative Combined_Key Country_Region County
+1 2020-01-01                       1           US             US   &lt;NA&gt;
+2 2020-02-01                       2           US             US   &lt;NA&gt;
+3 2020-03-01                    5335           US             US   &lt;NA&gt;
+4 2020-04-01                   66500           US             US   &lt;NA&gt;
+5 2020-05-01                  107705           US             US   &lt;NA&gt;
+6 2020-06-01                  127302           US             US   &lt;NA&gt;
+  Province_State
 1           &lt;NA&gt;
 2           &lt;NA&gt;
 3           &lt;NA&gt;
@@ -331,20 +331,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tail</span>(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>             Date Deaths_Count_Cumulative       Combined_Key County
-132400 2022-10-01                       3 Grand Princess, US   &lt;NA&gt;
-132401 2022-11-01                       3 Grand Princess, US   &lt;NA&gt;
-132402 2022-12-01                       3 Grand Princess, US   &lt;NA&gt;
-132403 2023-01-01                       3 Grand Princess, US   &lt;NA&gt;
-132404 2023-02-01                       3 Grand Princess, US   &lt;NA&gt;
-132405 2023-03-01                       3 Grand Princess, US   &lt;NA&gt;
-       Province_State Country_Region
-132400 Grand Princess             US
-132401 Grand Princess             US
-132402 Grand Princess             US
-132403 Grand Princess             US
-132404 Grand Princess             US
-132405 Grand Princess             US</code></pre>
+<pre><code>             Date Deaths_Count_Cumulative       Combined_Key Country_Region
+132400 2022-10-01                       3 Grand Princess, US             US
+132401 2022-11-01                       3 Grand Princess, US             US
+132402 2022-12-01                       3 Grand Princess, US             US
+132403 2023-01-01                       3 Grand Princess, US             US
+132404 2023-02-01                       3 Grand Princess, US             US
+132405 2023-03-01                       3 Grand Princess, US             US
+       County Province_State
+132400   &lt;NA&gt; Grand Princess
+132401   &lt;NA&gt; Grand Princess
+132402   &lt;NA&gt; Grand Princess
+132403   &lt;NA&gt; Grand Princess
+132404   &lt;NA&gt; Grand Princess
+132405   &lt;NA&gt; Grand Princess</code></pre>
 </div>
 </div>
 <p>The <code>select()</code> function is used to keep or drop columns. It can also be used to organize the existing columns. We would like to organize the columns by region followed by the month the record was made and then the cumulative deaths recorded.</p>
@@ -357,12 +357,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  Combined_Key County Province_State Country_Region       Date
-1           US   &lt;NA&gt;           &lt;NA&gt;           &lt;NA&gt; 2020-01-01
-2           US   &lt;NA&gt;           &lt;NA&gt;           &lt;NA&gt; 2020-02-01
-3           US   &lt;NA&gt;           &lt;NA&gt;           &lt;NA&gt; 2020-03-01
-4           US   &lt;NA&gt;           &lt;NA&gt;           &lt;NA&gt; 2020-04-01
-5           US   &lt;NA&gt;           &lt;NA&gt;           &lt;NA&gt; 2020-05-01
-6           US   &lt;NA&gt;           &lt;NA&gt;           &lt;NA&gt; 2020-06-01
+1           US   &lt;NA&gt;           &lt;NA&gt;             US 2020-01-01
+2           US   &lt;NA&gt;           &lt;NA&gt;             US 2020-02-01
+3           US   &lt;NA&gt;           &lt;NA&gt;             US 2020-03-01
+4           US   &lt;NA&gt;           &lt;NA&gt;             US 2020-04-01
+5           US   &lt;NA&gt;           &lt;NA&gt;             US 2020-05-01
+6           US   &lt;NA&gt;           &lt;NA&gt;             US 2020-06-01
   Deaths_Count_Cumulative
 1                       1
 2                       2
@@ -385,12 +385,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  Combined_Key County Province_State Country_Region       Date
-1           US   &lt;NA&gt;           &lt;NA&gt;           &lt;NA&gt; 2020-01-01
-2           US   &lt;NA&gt;           &lt;NA&gt;           &lt;NA&gt; 2020-02-01
-3           US   &lt;NA&gt;           &lt;NA&gt;           &lt;NA&gt; 2020-03-01
-4           US   &lt;NA&gt;           &lt;NA&gt;           &lt;NA&gt; 2020-04-01
-5           US   &lt;NA&gt;           &lt;NA&gt;           &lt;NA&gt; 2020-05-01
-6           US   &lt;NA&gt;           &lt;NA&gt;           &lt;NA&gt; 2020-06-01
+1           US   &lt;NA&gt;           &lt;NA&gt;             US 2020-01-01
+2           US   &lt;NA&gt;           &lt;NA&gt;             US 2020-02-01
+3           US   &lt;NA&gt;           &lt;NA&gt;             US 2020-03-01
+4           US   &lt;NA&gt;           &lt;NA&gt;             US 2020-04-01
+5           US   &lt;NA&gt;           &lt;NA&gt;             US 2020-05-01
+6           US   &lt;NA&gt;           &lt;NA&gt;             US 2020-06-01
   Deaths_Count_Cumulative Deaths_Count_Monthly
 1                       1                    1
 2                       2                    1
@@ -460,11 +460,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>The <code>Combined_Key</code> variable combines information from <code>County</code>, <code>Province_State</code>, and <code>Country_Region</code>. Assume we only have the county-level data and wish to generate the state- and country-level <code>Combined_Key</code> variable. We can do this in two ways: <code>str_c()</code> or <code>str_split()</code>.</p>
 <p>For this example we will subset the data by county-level information only. We use <code>str_count()</code> to represent the number of times a string pattern is detected within any given string. County-level data will have two commas, so this is one method we can use to subset our data.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>df_county <span class="ot">&lt;-</span> df_filtered[<span class="fu">str_count</span>(df_filtered<span class="sc">$</span>Combined_Key, <span class="st">","</span>) <span class="sc">==</span> <span class="dv">2</span>, ]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>df_state_level <span class="ot">&lt;-</span> df_filtered[<span class="fu">str_count</span>(df_filtered<span class="sc">$</span>Combined_Key, <span class="st">","</span>) <span class="sc">==</span> <span class="dv">2</span>, ]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><strong>Option #1:</strong> Generate a new column by combining the desired columns with <code>", "</code> as the separator.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str_c</span>(df_county<span class="sc">$</span>Province_State, df_county<span class="sc">$</span>Country_Region, <span class="at">sep =</span> <span class="st">", "</span>) <span class="sc">|&gt;</span> <span class="fu">unique</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str_c</span>(df_state_level<span class="sc">$</span>Province_State, df_state_level<span class="sc">$</span>Country_Region, <span class="at">sep =</span> <span class="st">", "</span>) <span class="sc">|&gt;</span> <span class="fu">unique</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> [1] "South Carolina, US"       "Louisiana, US"           
  [3] "Virginia, US"             "Idaho, US"               
@@ -496,7 +496,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p><strong>Option #2:</strong> Split the string only to the first observation of the string match.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str_split</span>(df_county<span class="sc">$</span>Combined_Key, <span class="st">","</span>, <span class="at">simplify =</span> <span class="cn">TRUE</span>, <span class="at">n =</span> <span class="dv">2</span>)[, <span class="dv">2</span>] <span class="sc">|&gt;</span> </span>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str_split</span>(df_state_level<span class="sc">$</span>Combined_Key, <span class="st">","</span>, <span class="at">simplify =</span> <span class="cn">TRUE</span>, <span class="at">n =</span> <span class="dv">2</span>)[, <span class="dv">2</span>] <span class="sc">|&gt;</span> </span>
 <span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">str_trim</span>(<span class="at">side =</span> <span class="st">"both"</span>) <span class="sc">|&gt;</span> <span class="fu">unique</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> [1] "South Carolina, US"       "Louisiana, US"           
@@ -527,13 +527,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 [51] "Hawaii, US"               "Delaware, US"            </code></pre>
 </div>
 </div>
+<section id="bonus-iterating-operations-over-columns" class="level3">
+<h3 class="anchored" data-anchor-id="bonus-iterating-operations-over-columns">Bonus: Iterating Operations Over Columns</h3>
 <p>Say we wish to specify that the Virgin Islands entries only reflect results for the U.S. territory. We can replace specific strings exactly using <code>str_replace()</code>.</p>
 <p>Going forward, we only require the <code>Combined_Key</code> variable, as the <code>Country_Region</code>, <code>Province_State</code>, and <code>County</code> variables are succinctly represented there. We can adjust the <code>"Virgin Islands"</code> entries for that column only.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>df_filtered[, <span class="st">"Combined_Key"</span>] <span class="ot">&lt;-</span> <span class="fu">str_replace</span>(df_filtered[, <span class="st">"Combined_Key"</span>],  <span class="st">"Virgin Islands"</span>, <span class="st">"US Virgin Islands"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<section id="bonus-iterating-operations-over-columns" class="level3">
-<h3 class="anchored" data-anchor-id="bonus-iterating-operations-over-columns">Bonus: iterating operations over columns</h3>
 <p>Note that it is possible to adjust multiple columns at once using <code>sapply()</code>. Notice that with the base pipe <code>|&gt;</code> the standard placeholder <code>_</code> does not move information into the <code>sapply()</code> function. To fix this, we wrap the <code>sapply()</code> pipe level and specify a placeholder for the values being passed from the left-side to <code>sapply()</code>. In this scenario, we are calling that information <code>x</code>.</p>
 <p><code>sapply()</code> is one of a few useful functions that repeats operations over columns, rows, or lists. <code>sapply()</code> will only apply the function over a the columns of a data frame.</p>
 <div class="cell">
@@ -597,8 +597,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Make plot interactive</span></span>
 <span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplotly</span>(plot_deaths)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<div class="plotly html-widget html-fill-item" id="htmlwidget-a4ea540aef269173d75a" style="width:100%;height:464px;"></div>
-<script type="application/json" data-for="htmlwidget-a4ea540aef269173d75a">{"x":{"data":[{"x":[18262,18293,18322,18353,18383,18414,18444,18475,18506,18536,18567,18597,18628,18659,18687,18718,18748,18779,18809,18840,18871,18901,18932,18962,18993,19024,19052,19083,19113,19144,19174,19205,19236,19266,19297,19327,19358,19389,19417],"y":[1,1,5333,61165,41205,19597,26303,28877,22775,24336,39730,79628,95664,65102,36349,23677,17846,10373,8765,27955,58785,47860,34474,45987,62846,60978,32820,12895,10773,10726,11908,15920,13073,10755,10091,12036,15759,11160,3857],"text":["Date: 2020-01-01<br />Count:     1","Date: 2020-02-01<br />Count:     1","Date: 2020-03-01<br />Count:  5333","Date: 2020-04-01<br />Count: 61165","Date: 2020-05-01<br />Count: 41205","Date: 2020-06-01<br />Count: 19597","Date: 2020-07-01<br />Count: 26303","Date: 2020-08-01<br />Count: 28877","Date: 2020-09-01<br />Count: 22775","Date: 2020-10-01<br />Count: 24336","Date: 2020-11-01<br />Count: 39730","Date: 2020-12-01<br />Count: 79628","Date: 2021-01-01<br />Count: 95664","Date: 2021-02-01<br />Count: 65102","Date: 2021-03-01<br />Count: 36349","Date: 2021-04-01<br />Count: 23677","Date: 2021-05-01<br />Count: 17846","Date: 2021-06-01<br />Count: 10373","Date: 2021-07-01<br />Count:  8765","Date: 2021-08-01<br />Count: 27955","Date: 2021-09-01<br />Count: 58785","Date: 2021-10-01<br />Count: 47860","Date: 2021-11-01<br />Count: 34474","Date: 2021-12-01<br />Count: 45987","Date: 2022-01-01<br />Count: 62846","Date: 2022-02-01<br />Count: 60978","Date: 2022-03-01<br />Count: 32820","Date: 2022-04-01<br />Count: 12895","Date: 2022-05-01<br />Count: 10773","Date: 2022-06-01<br />Count: 10726","Date: 2022-07-01<br />Count: 11908","Date: 2022-08-01<br />Count: 15920","Date: 2022-09-01<br />Count: 13073","Date: 2022-10-01<br />Count: 10755","Date: 2022-11-01<br />Count: 10091","Date: 2022-12-01<br />Count: 12036","Date: 2023-01-01<br />Count: 15759","Date: 2023-02-01<br />Count: 11160","Date: 2023-03-01<br />Count:  3857"],"type":"scatter","mode":"lines","line":{"width":3.7795275590551185,"color":"rgba(136,8,8,1)","dash":"solid"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":43.762557077625573,"r":7.3059360730593621,"b":25.57077625570777,"l":54.794520547945211},"font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"title":{"text":"Daily Death Counts of COVID-19 in the US","font":{"color":"rgba(0,0,0,1)","family":"","size":17.534246575342465},"x":0,"xref":"paper"},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[18204.25,19474.75],"tickmode":"array","ticktext":["Mar 2020","Jul 2020","Nov 2020","Mar 2021","Jul 2021","Nov 2021","Mar 2022","Jul 2022","Nov 2022","Mar 2023"],"tickvals":[18322,18444,18567,18687,18809,18932,19052,19174,19297,19417],"categoryorder":"array","categoryarray":["Mar 2020","Jul 2020","Nov 2020","Mar 2021","Jul 2021","Nov 2021","Mar 2022","Jul 2022","Nov 2022","Mar 2023"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"y","title":{"text":"","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-4782.1500000000005,100447.14999999999],"tickmode":"array","ticktext":["0 K","25 K","50 K","75 K","100 K"],"tickvals":[0,25000.000000000004,50000,75000,100000],"categoryorder":"array","categoryarray":["0 K","25 K","50 K","75 K","100 K"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"x","title":{"text":"Daily Counts","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":false,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.68949771689498}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"8fde456e77c3":{"x":{},"y":{},"type":"scatter"}},"cur_data":"8fde456e77c3","visdat":{"8fde456e77c3":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<div class="plotly html-widget html-fill-item" id="htmlwidget-d178ce01c3f1584cfab2" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-d178ce01c3f1584cfab2">{"x":{"data":[{"x":[18262,18293,18322,18353,18383,18414,18444,18475,18506,18536,18567,18597,18628,18659,18687,18718,18748,18779,18809,18840,18871,18901,18932,18962,18993,19024,19052,19083,19113,19144,19174,19205,19236,19266,19297,19327,19358,19389,19417],"y":[1,1,5333,61165,41205,19597,26303,28877,22775,24336,39730,79628,95664,65102,36349,23677,17846,10373,8765,27955,58785,47860,34474,45987,62846,60978,32820,12895,10773,10726,11908,15920,13073,10755,10091,12036,15759,11160,3857],"text":["Date: 2020-01-01<br />Count:     1","Date: 2020-02-01<br />Count:     1","Date: 2020-03-01<br />Count:  5333","Date: 2020-04-01<br />Count: 61165","Date: 2020-05-01<br />Count: 41205","Date: 2020-06-01<br />Count: 19597","Date: 2020-07-01<br />Count: 26303","Date: 2020-08-01<br />Count: 28877","Date: 2020-09-01<br />Count: 22775","Date: 2020-10-01<br />Count: 24336","Date: 2020-11-01<br />Count: 39730","Date: 2020-12-01<br />Count: 79628","Date: 2021-01-01<br />Count: 95664","Date: 2021-02-01<br />Count: 65102","Date: 2021-03-01<br />Count: 36349","Date: 2021-04-01<br />Count: 23677","Date: 2021-05-01<br />Count: 17846","Date: 2021-06-01<br />Count: 10373","Date: 2021-07-01<br />Count:  8765","Date: 2021-08-01<br />Count: 27955","Date: 2021-09-01<br />Count: 58785","Date: 2021-10-01<br />Count: 47860","Date: 2021-11-01<br />Count: 34474","Date: 2021-12-01<br />Count: 45987","Date: 2022-01-01<br />Count: 62846","Date: 2022-02-01<br />Count: 60978","Date: 2022-03-01<br />Count: 32820","Date: 2022-04-01<br />Count: 12895","Date: 2022-05-01<br />Count: 10773","Date: 2022-06-01<br />Count: 10726","Date: 2022-07-01<br />Count: 11908","Date: 2022-08-01<br />Count: 15920","Date: 2022-09-01<br />Count: 13073","Date: 2022-10-01<br />Count: 10755","Date: 2022-11-01<br />Count: 10091","Date: 2022-12-01<br />Count: 12036","Date: 2023-01-01<br />Count: 15759","Date: 2023-02-01<br />Count: 11160","Date: 2023-03-01<br />Count:  3857"],"type":"scatter","mode":"lines","line":{"width":3.7795275590551185,"color":"rgba(136,8,8,1)","dash":"solid"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":43.762557077625573,"r":7.3059360730593621,"b":25.57077625570777,"l":54.794520547945211},"font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"title":{"text":"Daily Death Counts of COVID-19 in the US","font":{"color":"rgba(0,0,0,1)","family":"","size":17.534246575342465},"x":0,"xref":"paper"},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[18204.25,19474.75],"tickmode":"array","ticktext":["Mar 2020","Jul 2020","Nov 2020","Mar 2021","Jul 2021","Nov 2021","Mar 2022","Jul 2022","Nov 2022","Mar 2023"],"tickvals":[18322,18444,18567,18687,18809,18932,19052,19174,19297,19417],"categoryorder":"array","categoryarray":["Mar 2020","Jul 2020","Nov 2020","Mar 2021","Jul 2021","Nov 2021","Mar 2022","Jul 2022","Nov 2022","Mar 2023"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"y","title":{"text":"","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-4782.1500000000005,100447.14999999999],"tickmode":"array","ticktext":["0 K","25 K","50 K","75 K","100 K"],"tickvals":[0,25000.000000000004,50000,75000,100000],"categoryorder":"array","categoryarray":["0 K","25 K","50 K","75 K","100 K"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"x","title":{"text":"Daily Counts","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":false,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.68949771689498}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"aa01e730f4e":{"x":{},"y":{},"type":"scatter"}},"cur_data":"aa01e730f4e","visdat":{"aa01e730f4e":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 </section>
@@ -607,6 +607,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol type="1">
 <li>Filter the <code>df</code> data set to include only rows from 2021.</li>
 <li>With the data set filtered for rows from 2021, determine the day with the highest death count along with the corresponding count.</li>
+<li>We want to see how many counties called “Adams” are represented in the data set.
+<ol type="a">
+<li>Subset the data set by string matches in <code>County</code> and find how many rows you see. Remember that each county is expected to have 39 different dates reported.</li>
+<li>Table your subset results by <code>County</code> and <code>Province_State</code>. Does this change the answer you got from part a?</li>
+</ol></li>
 </ol>
 </section>
 

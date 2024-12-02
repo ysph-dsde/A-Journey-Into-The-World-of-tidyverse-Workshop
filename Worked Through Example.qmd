@@ -35,7 +35,7 @@ Now we will fetch the semi-cleaned COVID-19 deaths data set that has been prepar
 
 ```{r}
 # Save the GitHub raw URL associated with our data set.
-df_url  <- "https://raw.githubusercontent.com/ysph-dsde/A-Journey-Into-The-World-of-tidyverse-Workshop/refs/heads/main/Data%20for%20the%20Workshop_Aggregated%20by%20Month.csv"
+df_url  <- "https://raw.githubusercontent.com/ysph-dsde/A-Journey-Into-The-World-of-tidyverse-Workshop/refs/heads/main/Data%20Sets/Data%20for%20the%20Workshop_Aggregated%20by%20Month.csv"
 
 # Read in the data set using the URL via the readr package.
 df_raw  <- read_csv(file = df_url, show_col_types = FALSE)
@@ -161,7 +161,7 @@ Right now, the data frame `df_US` is missing the `Combined_Key` column. If we us
 
 ```{r}
 df_US <- df_US |>
-  mutate(Combined_Key = "US")
+  mutate(Combined_Key = "US", Country_Region = "US")
 
 # Inspect the mutated data.
 head(df_US)
@@ -261,21 +261,23 @@ The `Combined_Key` variable combines information from `County`, `Province_State`
 For this example we will subset the data by county-level information only. We use `str_count()` to represent the number of times a string pattern is detected within any given string. County-level data will have two commas, so this is one method we can use to subset our data.
 
 ```{r}
-df_county <- df_filtered[str_count(df_filtered$Combined_Key, ",") == 2, ]
+df_state_level <- df_filtered[str_count(df_filtered$Combined_Key, ",") == 2, ]
 ```
 
 **Option #1:** Generate a new column by combining the desired columns with `", "` as the separator.
 
 ```{r}
-str_c(df_county$Province_State, df_county$Country_Region, sep = ", ") |> unique()
+str_c(df_state_level$Province_State, df_state_level$Country_Region, sep = ", ") |> unique()
 ```
 
 **Option #2:** Split the string only to the first observation of the string match.
 
 ```{r}
-str_split(df_county$Combined_Key, ",", simplify = TRUE, n = 2)[, 2] |> 
+str_split(df_state_level$Combined_Key, ",", simplify = TRUE, n = 2)[, 2] |> 
   str_trim(side = "both") |> unique()
 ```
+
+### Bonus: Iterating Operations Over Columns
 
 Say we wish to specify that the Virgin Islands entries only reflect results for the U.S. territory. We can replace specific strings exactly using `str_replace()`.
 
@@ -284,8 +286,6 @@ Going forward, we only require the `Combined_Key` variable, as the `Country_Regi
 ```{r}
 df_filtered[, "Combined_Key"] <- str_replace(df_filtered[, "Combined_Key"],  "Virgin Islands", "US Virgin Islands")
 ```
-
-### Bonus: Iterating Operations Over Columns
 
 Note that it is possible to adjust multiple columns at once using `sapply()`. Notice that with the base pipe `|>` the standard placeholder `_` does not move information into the `sapply()` function. To fix this, we wrap the `sapply()` pipe level and specify a placeholder for the values being passed from the left-side to `sapply()`. In this scenario, we are calling that information `x`.
 
@@ -337,3 +337,12 @@ ggplotly(plot_deaths)
 
 1.  Filter the `df` data set to include only rows from 2021.
 2.  With the data set filtered for rows from 2021, determine the day with the highest death count along with the corresponding count.
+3.  We want to see how many counties called "Adams" are represented in the data set.
+    a) Subset the data set by string matches in `County` and find how many rows you see. Remember that each county is expected to have 39 different dates reported.
+    b) Table your subset results by `County` and `Province_State`. Does this change the answer you got from part a?
+
+
+
+
+
+
