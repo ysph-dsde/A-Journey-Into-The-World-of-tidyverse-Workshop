@@ -24,9 +24,9 @@ This is the only repository associated with this workshop. It contains all of th
 
 ### Overview Of Contents
 
-- **For the worked through example:**
-- **For the challenge questions:**
-- **For the challenge questions answers:**
+- **For the worked through example:** `Worked Through Example.qmd`. Multiple associated files are generated when rendering the Quarto document (HTML and a directory).
+- **For the challenge questions:** At the end of `Worked Through Example.qmd`
+- **For the challenge questions answers:** `Answers to Challenge Questions.R`
 - **Data set for the above scripts:** `COVID-19 Deaths_Cleaned_Aggregated by Month.csv`
 - **For cleaning the raw data:** `Cleaning Script_JHU CRC COVID-19 Deaths.R`
 - **R version:** 4.4.1
@@ -131,9 +131,11 @@ Now that you have copied this repository into your own GitHub, you are ready to 
 
 ### Initializing the Environment
 
+The workshop example `Worked Through Example.qmd` uses a pre-cleaned data set that has been aggregated to montly counts, and it does not include the code for initializing the environment with `renv()`. If users are experiencing problems installing the appropriate package versions that were used to generate the example, they will need to follow the provided steps below to install all called for packages to the project folder.
+
 1. Open the newly cloned file.
 2. Launch the project by opening `A-Journey-Into-The-World-of-tidyverse-Workshop.Rproj`.
-3. Open `_______`.
+3. Open `Cleaning Script_JHU CRC COVID-19 Deaths.R`.
 4. In the R console, activate the enviroment by runing:
     ```
     renv::restore()
