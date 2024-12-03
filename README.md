@@ -20,7 +20,7 @@ You can find out more about past and upcoming tutorials on our YouTube (coming s
 
 ## About Repository
 
-This is the only repository associated with this workshop. It contains all of the relevant code, the data set, and a PDF of the slide deck that was used in the workshop.
+This is the only repository associated with this workshop. It contains all of the relevant code, the data set, and a PDF of the slide deck that was used in the workshop. Limited comments were added to the slide deck PDF. Users who wish to see these extra commentaries will need to download the PDF to their local device.
 
 ### Overview Of Contents
 
