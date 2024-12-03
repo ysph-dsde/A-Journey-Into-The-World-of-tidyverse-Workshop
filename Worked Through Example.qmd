@@ -317,7 +317,7 @@ We will calculate the daily COVID-19 death counts across the U.S. and create a l
 plot_deaths <- df |>
   filter(Combined_Key == "US") |>
   # Rename column names so they look nicer in plotly
-  rename(Date = Date, Count = Deaths_Count_Monthly) |>  
+  rename(Date = Month, Count = Deaths_Count) |>  
   ggplot(aes(x = Date, y = Count)) +
   geom_line(aes(x = Date, y = Count), color = "#880808", size = 1) +
   # Format the y-axis to show values in terms of thousands.
@@ -325,8 +325,8 @@ plot_deaths <- df |>
   # Format the x-axis to show dates as Jan 2020 from 01/01/2020, spaced
   # every four months.
   scale_x_date(date_breaks = "4 month", date_labels =  "%b %Y") +
-  labs(x = NULL, y = "Daily Counts",
-       title = "Daily Death Counts of COVID-19 in the US") +
+  labs(x = "Date Recorded", y = "COVID-19 Deaths",
+       title = "COVID-19 Deaths in the US - Grouped by Month") +
   theme_minimal()
 
 # Make plot interactive
@@ -338,11 +338,5 @@ ggplotly(plot_deaths)
 1.  Filter the `df` data set to include only rows from 2021.
 2.  With the data set filtered for rows from 2021, determine the day with the highest death count along with the corresponding count.
 3.  We want to see how many counties called "Adams" are represented in the data set.
-    a) Subset the data set by string matches in `County` and find how many rows you see. Remember that each county is expected to have 39 different dates reported.
-    b) Table your subset results by `County` and `Province_State`. Does this change the answer you got from part a?
-
-
-
-
-
-
+    a)  Subset the data set by string matches in `County` and find how many rows you see. Remember that each county is expected to have 39 different dates reported.
+    b)  Table your subset results by `County` and `Province_State`. Does this change the answer you got from part a?
