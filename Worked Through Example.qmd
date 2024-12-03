@@ -317,7 +317,7 @@ We will calculate the daily COVID-19 death counts across the U.S. and create a l
 plot_deaths <- df |>
   filter(Combined_Key == "US") |>
   # Rename column names so they look nicer in plotly
-  rename(Date = Date, Count = Deaths_Count_Monthly) |>  
+  rename(Date = Month, Count = Deaths_Count) |>  
   ggplot(aes(x = Date, y = Count)) +
   geom_line(aes(x = Date, y = Count), color = "#880808", size = 1) +
   # Format the y-axis to show values in terms of thousands.
